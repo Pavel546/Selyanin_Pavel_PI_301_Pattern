@@ -1,0 +1,76 @@
+from abc import ABC, abstractmethod
+
+# Виджеты
+class LightButton:
+    def render(self) -> str:
+        return "[Light Button]"
+
+class DarkButton:
+    def render(self) -> str:
+        return "[Dark Button]"
+
+class LightCheckbox:
+    def render(self) -> str:
+        return "[Light Checkbox]"
+
+class DarkCheckbox:
+    def render(self) -> str:
+        return "[Dark Checkbox]"
+
+class LightInput:
+    def render(self) -> str:
+        return "[Light Input]"
+
+class DarkInput:
+    def render(self) -> str:
+        return "[Dark Input]"
+
+# Абстрактная фабрика
+class UIFactory(ABC):
+    @abstractmethod
+    def create_button(self):
+        pass
+
+    @abstractmethod
+    def create_checkbox(self):
+        pass
+
+    @abstractmethod
+    def create_input(self):
+        pass
+
+# Конкретные фабрики
+class LightThemeFactory(UIFactory):
+    def create_button(self):
+        return LightButton()
+
+    def create_checkbox(self):
+        return LightCheckbox()
+
+    def create_input(self):
+        return LightInput()
+
+class DarkThemeFactory(UIFactory):
+    def create_button(self):
+        return DarkButton()
+
+    def create_checkbox(self):
+        return DarkCheckbox()
+
+    def create_input(self):
+        return DarkInput()
+
+# Приложение
+class Application:
+    def __init__(self, factory: UIFactory):
+        self.factory = factory
+
+    def render_ui(self):
+        btn = self.factory.create_button()     # кнопка
+        chk = self.factory.create_checkbox()   # чекбокс
+        inp = self.factory.create_input()      # поле ввода
+        print(btn.render(), chk.render(), inp.render())
+
+# Использование
+app = Application(DarkThemeFactory())
+app.render_ui()
