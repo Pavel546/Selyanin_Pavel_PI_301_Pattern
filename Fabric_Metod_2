@@ -1,0 +1,38 @@
+# Генераторы отчётов
+class PdfReport:
+    def generate(self, data: dict) -> str:
+        return f"[PDF] Отчёт: {data}"
+
+class ExcelReport:
+    def generate(self, data: dict) -> str:
+        return f"[Excel] Отчёт: {data}"
+
+class CsvReport:
+    def generate(self, data: dict) -> str:
+        return f"[CSV] Отчёт: {data}"
+
+# Базовый класс с фабричным методом
+class ReportManager:
+    def create_report(self):
+        raise NotImplementedError
+
+    def export(self, data: dict) -> str:
+        report = self.create_report()  # создаём генератор
+        return report.generate(data)   # генерируем отчёт
+
+# Конкретные менеджеры
+class PdfReportManager(ReportManager):
+    def create_report(self):
+        return PdfReport()
+
+class ExcelReportManager(ReportManager):
+    def create_report(self):
+        return ExcelReport()
+
+class CsvReportManager(ReportManager):
+    def create_report(self):
+        return CsvReport()
+
+# Использование
+manager = PdfReportManager()
+print(manager.export({"title": "Продажи Q1", "total": 150000}))
