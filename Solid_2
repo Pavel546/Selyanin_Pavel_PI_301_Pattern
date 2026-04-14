@@ -1,0 +1,64 @@
+from dataclasses import dataclass
+from abc import ABC, abstractmethod
+
+# Модели
+@dataclass
+class Order:
+    total: float
+
+@dataclass
+class Customer:
+    kind: str  # "regular" | "vip" | "employee"
+
+# Абстракция скидки
+class DiscountStrategy(ABC):
+    @abstractmethod
+    def apply(self, order: Order) -> float:
+        pass
+
+# Конкретные стратегии
+class RegularDiscount(DiscountStrategy):
+    def apply(self, order: Order) -> float:
+        return order.total
+
+class VipDiscount(DiscountStrategy):
+    def apply(self, order: Order) -> float:
+        return order.total * 0.9
+
+class EmployeeDiscount(DiscountStrategy):
+    def apply(self, order: Order) -> float:
+        return order.total * 0.8
+
+# Новая скидка — добавляется БЕЗ изменения apply_discount
+class BlackFridayDiscount(DiscountStrategy):
+    def apply(self, order: Order) -> float:
+        return order.total * 0.7
+
+# Реестр стратегий
+class DiscountRegistry:
+    def __init__(self):
+        self._strategies = {}
+
+    def register(self, kind: str, strategy: DiscountStrategy):
+        self._strategies[kind] = strategy
+
+    def get(self, kind: str) -> DiscountStrategy:
+        return self._strategies.get(kind, RegularDiscount())
+
+# Центральная логика (НЕ меняется)
+def apply_discount(order: Order, customer: Customer, registry: DiscountRegistry) -> float:
+    strategy = registry.get(customer.kind)
+    return strategy.apply(order)
+
+# Конфигурация
+registry = DiscountRegistry()
+registry.register("regular", RegularDiscount())
+registry.register("vip", VipDiscount())
+registry.register("employee", EmployeeDiscount())
+registry.register("black_friday", BlackFridayDiscount())  # добавили без изменений логики
+
+# Использование
+order = Order(100)
+customer = Customer("vip")
+
+print(apply_discount(order, customer, registry))  # 90.0
