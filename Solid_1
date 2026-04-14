@@ -1,0 +1,94 @@
+import json
+from dataclasses import dataclass
+from abc import ABC, abstractmethod
+
+# 1. Модель
+@dataclass
+class Order:
+    id: str
+    price: float
+    qty: int
+    customer_email: str
+
+# 2. Загрузка
+class OrderLoader:
+    def load(self, json_path: str) -> list[dict]:
+        with open(json_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+# 3. Валидация + парсинг
+class OrderParser:
+    def parse(self, raw: list[dict]) -> list[Order]:
+        orders = []
+        for item in raw:
+            if not all(k in item for k in ("id", "price", "qty", "email")):
+                raise ValueError("Invalid order payload")
+            if item["qty"] <= 0:
+                raise ValueError("qty must be positive")
+
+            orders.append(
+                Order(
+                    id=item["id"],
+                    price=float(item["price"]),
+                    qty=int(item["qty"]),
+                    customer_email=item["email"],
+                )
+            )
+        return orders
+
+# 4. Расчёт
+class OrderCalculator:
+    def total(self, orders: list[Order]) -> float:
+        return sum(o.price * o.qty for o in orders)
+
+# 5. Форматирование
+class TextReportFormatter:
+    def format(self, orders: list[Order], total: float) -> str:
+        return f"Orders count: {len(orders)}\nTotal: {total:.2f}\n"
+
+# 6. Отправка (интерфейс + реализации)
+class Notifier(ABC):
+    @abstractmethod
+    def send(self, to: str, subject: str, body: str) -> None:
+        pass
+
+class EmailNotifier(Notifier):
+    def send(self, to: str, subject: str, body: str) -> None:
+        print(f"[EMAIL to={to}] {subject}\n{body}")
+
+class NullNotifier(Notifier):
+    def send(self, to: str, subject: str, body: str) -> None:
+        pass
+
+# 7. Оркестратор
+class OrderReportService:
+    def __init__(self, loader, parser, calculator, formatter, notifier: Notifier):
+        self.loader = loader
+        self.parser = parser
+        self.calculator = calculator
+        self.formatter = formatter
+        self.notifier = notifier
+
+    def make_and_send_report(self, json_path: str) -> str:
+        raw = self.loader.load(json_path)
+        orders = self.parser.parse(raw)
+
+        total = self.calculator.total(orders)
+        report = self.formatter.format(orders, total)
+
+        for o in orders:
+            self.notifier.send(o.customer_email, "Your order report", report)
+
+        return report
+
+# Использование
+service = OrderReportService(
+    loader=OrderLoader(),
+    parser=OrderParser(),
+    calculator=OrderCalculator(),
+    formatter=TextReportFormatter(),
+    notifier=EmailNotifier(),  # можно заменить на NullNotifier()
+)
+
+report = service.make_and_send_report("orders.json")
+print(report)
