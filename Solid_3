@@ -1,0 +1,61 @@
+from abc import ABC, abstractmethod
+
+# Абстракция
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> int:
+        pass
+
+# Прямоугольник с изменяемыми сторонами
+class Rectangle(Shape):
+    def __init__(self, w: int, h: int):
+        self._w = w
+        self._h = h
+
+    @property
+    def width(self) -> int:
+        return self._w
+
+    @width.setter
+    def width(self, v: int) -> None:
+        self._w = v
+
+    @property
+    def height(self) -> int:
+        return self._h
+
+    @height.setter
+    def height(self, v: int) -> None:
+        self._h = v
+
+    def area(self) -> int:
+        return self._w * self._h
+
+# Квадрат — отдельный тип, без наследования от Rectangle
+class Square(Shape):
+    def __init__(self, side: int):
+        self._side = side
+
+    @property
+    def side(self) -> int:
+        return self._side
+
+    @side.setter
+    def side(self, v: int) -> None:
+        self._side = v
+
+    def area(self) -> int:
+        return self._side * self._side
+
+# Функция работает ТОЛЬКО с теми, кто поддерживает изменение width/height
+def resize_and_get_area(r: Rectangle) -> int:
+    r.width = 10
+    r.height = 5
+    return r.area()
+
+# Использование
+rect = Rectangle(2, 3)
+print(resize_and_get_area(rect))  # 50
+
+sq = Square(5)
+print(sq.area())  # 25
