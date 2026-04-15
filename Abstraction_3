@@ -1,0 +1,93 @@
+from abc import ABC, abstractmethod
+
+# Интерфейсы продуктов
+class Toast(ABC):
+    @abstractmethod
+    def show(self, message: str) -> None:
+        pass
+
+class Dialog(ABC):
+    @abstractmethod
+    def show(self, title: str, body: str, buttons: list[str]) -> None:
+        pass
+
+class ProgressBar(ABC):
+    @abstractmethod
+    def show(self, label: str, value: int) -> None:
+        pass
+
+# iOS продукты
+class IOSToast(Toast):
+    def show(self, message: str) -> None:
+        print(f"[iOS Toast] {message}")
+
+class IOSDialog(Dialog):
+    def show(self, title: str, body: str, buttons: list[str]) -> None:
+        print(f"[iOS Dialog] {title}: {body} | Кнопки: {buttons}")
+
+class IOSProgressBar(ProgressBar):
+    def show(self, label: str, value: int) -> None:
+        print(f"[iOS Progress] {label}: {value}%")
+
+# Android продукты
+class AndroidToast(Toast):
+    def show(self, message: str) -> None:
+        print(f"[Android Toast] {message}")
+
+class AndroidDialog(Dialog):
+    def show(self, title: str, body: str, buttons: list[str]) -> None:
+        print(f"[Android Dialog] {title}: {body} | Кнопки: {buttons}")
+
+class AndroidProgressBar(ProgressBar):
+    def show(self, label: str, value: int) -> None:
+        print(f"[Android Progress] {label}: {value}%")
+
+# Абстрактная фабрика
+class NotificationFactory(ABC):
+    @abstractmethod
+    def create_toast(self):
+        pass
+
+    @abstractmethod
+    def create_dialog(self):
+        pass
+
+    @abstractmethod
+    def create_progress_bar(self):
+        pass
+
+# Конкретные фабрики
+class IOSFactory(NotificationFactory):
+    def create_toast(self):
+        return IOSToast()
+
+    def create_dialog(self):
+        return IOSDialog()
+
+    def create_progress_bar(self):
+        return IOSProgressBar()
+
+class AndroidFactory(NotificationFactory):
+    def create_toast(self):
+        return AndroidToast()
+
+    def create_dialog(self):
+        return AndroidDialog()
+
+    def create_progress_bar(self):
+        return AndroidProgressBar()
+
+# Клиентский код
+def show_upload_progress(factory, filename: str, progress: int):
+    toast = factory.create_toast()          # уведомление
+    bar = factory.create_progress_bar()     # прогресс
+
+    toast.show(f"Загрузка {filename} начата")
+    bar.show("Прогресс загрузки", progress)
+
+    if progress == 100:
+        dialog = factory.create_dialog()    # окно завершения
+        dialog.show("Готово", f"{filename} успешно загружен", ["OK"])
+
+# Использование
+show_upload_progress(AndroidFactory(), "photo.jpg", 100)
