@@ -1,0 +1,93 @@
+# Пицца
+class Pizza:
+    def __init__(self):
+        self.size: str = ""
+        self.dough: str = ""
+        self.sauce: str = ""
+        self.cheese: str = ""
+        self.toppings: list[str] = []
+
+    def __str__(self) -> str:
+        toppings = ", ".join(self.toppings) if self.toppings else "без топпингов"
+        return (
+            f"Пицца {self.size} на {self.dough} тесте\n"
+            f"Соус: {self.sauce}, Сыр: {self.cheese}\n"
+            f"Топпинги: {toppings}"
+        )
+
+# Строитель
+class PizzaBuilder:
+    def __init__(self):
+        self.pizza = Pizza()
+
+    def set_size(self, size):
+        self.pizza.size = size
+        return self
+
+    def set_dough(self, dough):
+        self.pizza.dough = dough
+        return self
+
+    def set_sauce(self, sauce):
+        self.pizza.sauce = sauce
+        return self
+
+    def set_cheese(self, cheese):
+        self.pizza.cheese = cheese
+        return self
+
+    def add_topping(self, topping):
+        self.pizza.toppings.append(topping)
+        return self
+
+    def build(self):
+        if not self.pizza.size or not self.pizza.dough:
+            raise ValueError("Размер и тесто обязательны")
+        return self.pizza
+
+# Директор
+class Director:
+    def __init__(self, builder: PizzaBuilder):
+        self.builder = builder
+
+    def build_margherita(self):
+        self.builder = PizzaBuilder()
+        return (
+            self.builder
+            .set_size("M")
+            .set_dough("тонком")
+            .set_sauce("томатный")
+            .set_cheese("моцарелла")
+            .build()
+        )
+
+    def build_pepperoni(self):
+        self.builder = PizzaBuilder()
+        return (
+            self.builder
+            .set_size("L")
+            .set_dough("тонком")
+            .set_sauce("томатный")
+            .set_cheese("моцарелла")
+            .add_topping("пепперони")
+            .build()
+        )
+
+    def build_vegetarian(self):
+        self.builder = PizzaBuilder()
+        return (
+            self.builder
+            .set_size("L")
+            .set_dough("пышном")
+            .set_sauce("сливочный")
+            .set_cheese("моцарелла")
+            .add_topping("грибы")
+            .add_topping("перец")
+            .add_topping("оливки")
+            .build()
+        )
+
+# Использование
+director = Director(PizzaBuilder())
+print(director.build_margherita())
+print(director.build_pepperoni())
