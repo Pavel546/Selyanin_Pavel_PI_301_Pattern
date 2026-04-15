@@ -1,0 +1,76 @@
+# Резюме
+class Resume:
+    def __init__(self):
+        self.name = ""
+        self.email = ""
+        self.phone = ""
+        self.summary = ""
+        self.experience = []
+        self.education = []
+        self.skills = []
+
+    def __str__(self) -> str:
+        return (
+            f"=== {self.name} ===\n"
+            f"Email: {self.email}\n"
+            f"Навыки: {', '.join(self.skills)}\n"
+            f"Опыт: {len(self.experience)} позиций"
+        )
+
+# Строитель
+class ResumeBuilder:
+    def __init__(self):
+        self.resume = Resume()
+
+    def set_name(self, name: str):
+        self.resume.name = name
+        return self
+
+    def set_contacts(self, email: str, phone: str = ""):
+        self.resume.email = email
+        self.resume.phone = phone
+        return self
+
+    def add_experience(self, exp: dict):
+        self.resume.experience.append(exp)
+        return self
+
+    def add_education(self, edu: dict):
+        self.resume.education.append(edu)
+        return self
+
+    def add_skill(self, skill: str):
+        self.resume.skills.append(skill)
+        return self
+
+    def build(self):
+        return self.resume
+
+# Директор
+class Director:
+    def build_standard_resume(self):
+        return (
+            ResumeBuilder()
+            .set_name("Анна Иванова")
+            .set_contacts("anna@example.com")
+            .add_skill("Python")
+            .build()
+        )
+
+    def build_extended_resume(self):
+        return (
+            ResumeBuilder()
+            .set_name("Анна Иванова")
+            .set_contacts("anna@example.com", "+7-900-000-00-00")
+            .add_skill("Python")
+            .add_skill("SQL")
+            .add_skill("Docker")
+            .add_experience({"company": "Яндекс", "years": 3})
+            .add_education({"degree": "Бакалавр", "school": "МГУ"})
+            .build()
+        )
+
+# Использование
+director = Director()
+resume = director.build_extended_resume()
+print(resume)
