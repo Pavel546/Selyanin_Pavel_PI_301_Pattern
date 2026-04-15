@@ -1,0 +1,93 @@
+from dataclasses import dataclass, field
+
+@dataclass
+class HttpRequest:
+    method: str
+    url: str
+    headers: dict[str, str] = field(default_factory=dict)
+    body: str = ""
+    timeout: int = 30
+
+    def __str__(self) -> str:
+        return (
+            f"{self.method} {self.url}\n"
+            f"Headers: {self.headers}\n"
+            f"Body: {self.body[:50]}...\n"
+            f"Timeout: {self.timeout}s"
+        )
+
+# Строитель
+class HttpRequestBuilder:
+    def __init__(self):
+        self.request = HttpRequest("", "")
+
+    def set_method(self, method: str):
+        self.request.method = method
+        return self
+
+    def set_url(self, url: str):
+        self.request.url = url
+        return self
+
+    def add_header(self, key: str, value: str):
+        self.request.headers[key] = value
+        return self
+
+    def set_body(self, body: str):
+        self.request.body = str(body)
+        return self
+
+    def set_timeout(self, timeout: int):
+        self.request.timeout = timeout
+        return self
+
+    def build(self):
+        return self.request
+
+# Директор
+class Director:
+    def __init__(self, builder: HttpRequestBuilder):
+        self.builder = builder
+
+    def build_json_post(self, url, data):
+        self.builder = HttpRequestBuilder()
+        return (
+            self.builder
+            .set_method("POST")
+            .set_url(url)
+            .add_header("Content-Type", "application/json")
+            .set_body(data)
+            .set_timeout(30)
+            .build()
+        )
+
+    def build_auth_get(self, url, token):
+        self.builder = HttpRequestBuilder()
+        return (
+            self.builder
+            .set_method("GET")
+            .set_url(url)
+            .add_header("Authorization", f"Bearer {token}")
+            .set_timeout(15)
+            .build()
+        )
+
+    def build_multipart_upload(self, url, filename):
+        self.builder = HttpRequestBuilder()
+        return (
+            self.builder
+            .set_method("POST")
+            .set_url(url)
+            .add_header("Content-Type", "multipart/form-data")
+            .set_body(f"file={filename}")
+            .set_timeout(60)
+            .build()
+        )
+
+# Использование
+director = Director(HttpRequestBuilder())
+request = director.build_json_post(
+    "https://api.example.com/orders",
+    {"item": "book"}
+)
+print(request)
